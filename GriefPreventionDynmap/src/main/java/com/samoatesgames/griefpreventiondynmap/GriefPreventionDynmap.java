@@ -9,7 +9,6 @@ import java.util.logging.Level;
 import me.ryanhamshire.GriefPrevention.Claim;
 import me.ryanhamshire.GriefPrevention.DataStore;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
@@ -26,11 +25,6 @@ import org.dynmap.markers.MarkerSet;
  * @author Sam Oates <sam@samoatesgames.com>
  */
 public final class GriefPreventionDynmap extends JavaPlugin {
-
-    /**
-     * The dynmap api
-     */
-    private DynmapAPI m_dynmapAPI = null;
 
     /**
      * The dynmap marker api
@@ -74,19 +68,19 @@ public final class GriefPreventionDynmap extends JavaPlugin {
 
         // Dynmap isn't installed, disble this plugin
         if (dynmapPlugin == null) {
-            this.logError("The dynmap plugin was not found on this server...");
+            getLogger().warning("The dynmap plugin was not found on this server...");
             pluginManager.disablePlugin(this);
             return;
         }
 
-        m_dynmapAPI = (DynmapAPI) dynmapPlugin;
+        DynmapAPI m_dynmapAPI = (DynmapAPI) dynmapPlugin;
         m_dynmapMarkerAPI = m_dynmapAPI.getMarkerAPI();
 
         Plugin griefPreventionPlugin = pluginManager.getPlugin("GriefPrevention");
 
         // GriefPrevention isn't installed, disble this plugin
         if (griefPreventionPlugin == null) {
-            this.logError("The grief prevention plugin was not found on this server...");
+            getLogger().warning("The grief prevention plugin was not found on this server...");
             pluginManager.disablePlugin(this);
             return;
         }
@@ -95,13 +89,13 @@ public final class GriefPreventionDynmap extends JavaPlugin {
 
         // If either dynmap or grief prevention are disabled, disable this plugin
         if (!(dynmapPlugin.isEnabled() && griefPreventionPlugin.isEnabled())) {
-            this.logError("Either dynmap or grief prevention is disabled...");
+            getLogger().warning("Either dynmap or grief prevention is disabled...");
             pluginManager.disablePlugin(this);
             return;
         }
         
         if (!setupMarkerSet()) {
-            this.logError("Failed to setup a marker set...");
+            getLogger().warning("Failed to setup a marker set...");
             pluginManager.disablePlugin(this);
             return;
         }
@@ -118,36 +112,12 @@ public final class GriefPreventionDynmap extends JavaPlugin {
                     }
                 },
                 20L,
-                20L * this.getSetting(Setting.DynmapUpdateRate, 30)
+                20L * Setting.getSetting(Setting.DynmapUpdateRate, 30)
         );
 
-        this.logInfo("Succesfully enabled.");
+        getLogger().info("Succesfully enabled.");
     }
 
-    private void logInfo(String s) {
-        getLogger().info(s);
-    }
-
-    private int getSetting(String setting, int def) {
-        return setting != null && !setting.isEmpty() ? Integer.parseInt(setting) : def;
-    }
-
-    private String getSetting(String setting, String def) {
-        return setting != null && !setting.isEmpty() ? setting : def;
-    }
-
-    private boolean getSetting(String setting, boolean def) {
-        return setting != null && !setting.isEmpty() ? Boolean.parseBoolean(setting) : def;
-    }
-
-    private double getSetting(String setting, double def) {
-        return setting != null && !setting.isEmpty() ? Double.parseDouble(setting) : def;
-    }
-
-    private void logError(String s) {
-        getLogger().warning(s);
-    }
-    
     /**
      * Called when the plugin is disabled
      */
@@ -175,7 +145,7 @@ public final class GriefPreventionDynmap extends JavaPlugin {
 
         m_griefPreventionMarkerSet = m_dynmapMarkerAPI.getMarkerSet("griefprevention.markerset");
 
-        final String layerName = this.getSetting(Setting.ClaimsLayerName, "Claims");
+        final String layerName = Setting.getSetting(Setting.ClaimsLayerName, "Claims");
         if (m_griefPreventionMarkerSet == null) {
             m_griefPreventionMarkerSet = m_dynmapMarkerAPI.createMarkerSet("griefprevention.markerset", layerName, null, false);
         } else {
@@ -183,12 +153,12 @@ public final class GriefPreventionDynmap extends JavaPlugin {
         }
 
         if (m_griefPreventionMarkerSet == null) {
-            this.logError("Failed to create a marker set with the name 'griefprevention.markerset'.");
+            getLogger().warning("Failed to create a marker set with the name 'griefprevention.markerset'.");
             return false;
         }
 
-        m_griefPreventionMarkerSet.setLayerPriority(this.getSetting(Setting.ClaimsLayerPriority, 10));
-        m_griefPreventionMarkerSet.setHideByDefault(this.getSetting(Setting.ClaimsLayerHiddenByDefault, false));
+        m_griefPreventionMarkerSet.setLayerPriority(Setting.getSetting(Setting.ClaimsLayerPriority, 10));
+        m_griefPreventionMarkerSet.setHideByDefault(Setting.getSetting(Setting.ClaimsLayerHiddenByDefault, false));
 
         return true;
     }
@@ -199,21 +169,17 @@ public final class GriefPreventionDynmap extends JavaPlugin {
             m_claimsField = DataStore.class.getDeclaredField("claims");
             m_claimsField.setAccessible(true);
         } catch (NoSuchFieldException ex) {
-            this.logException("Error reflecting claims member from gried prevention, the field 'claims' does not exist!", ex);
+            getLogger().log(Level.WARNING, "Error reflecting claims member from gried prevention, the field 'claims' does not exist!", ex);
             return false;
         } catch (SecurityException ex) {
-            this.logException("Error reflecting claims member from gried prevention, you don't have permission to do this.", ex);
+            getLogger().log(Level.WARNING, "Error reflecting claims member from gried prevention, you don't have permission to do this.", ex);
             return false;
         } catch (IllegalArgumentException ex) {
-            this.logException("Error reflecting claims member from gried prevention, the specified arguments are invalid.", ex);
+            getLogger().log(Level.WARNING, "Error reflecting claims member from gried prevention, the specified arguments are invalid.", ex);
             return false;
         } 
         
         return true;
-    }
-
-    private void logException(String s, Exception ex) {
-        getLogger().log(Level.WARNING, s, ex);
     }
 
     /**
@@ -230,13 +196,13 @@ public final class GriefPreventionDynmap extends JavaPlugin {
                 claims = (ArrayList<Claim>) rawClaims;
             }
         } catch (SecurityException ex) {
-            this.logException("Error reflecting claims member from gried prevention, you don't have permission to do this.", ex);
+            getLogger().log(Level.WARNING, "Error reflecting claims member from gried prevention, you don't have permission to do this.", ex);
             return;
         } catch (IllegalArgumentException ex) {
-            this.logException("Error reflecting claims member from gried prevention, the specified arguments are invalid.", ex);
+            getLogger().log(Level.WARNING, "Error reflecting claims member from gried prevention, the specified arguments are invalid.", ex);
             return;
         } catch (IllegalAccessException ex) {
-            this.logException("Error reflecting claims member from gried prevention, you don't have permission to access the feild 'claims'.", ex);
+            getLogger().log(Level.WARNING, "Error reflecting claims member from gried prevention, you don't have permission to access the feild 'claims'.", ex);
             return;
         }
 
@@ -244,7 +210,7 @@ public final class GriefPreventionDynmap extends JavaPlugin {
         if (claims != null) {
             for (Claim claim : claims) {
                 createClaimMarker(claim, newClaims);
-                if (claim.children != null && this.getSetting(Setting.ShowChildClaims, true)) {
+                if (claim.children != null && Setting.getSetting(Setting.ShowChildClaims, true)) {
                     for (Claim children : claim.children) {
                         createClaimMarker(children, newClaims);
                     }
@@ -315,7 +281,6 @@ public final class GriefPreventionDynmap extends JavaPlugin {
 
     /**
      * Setup the markers styling
-     * @param marker 
      */
     private void setMarkerStyle(AreaMarker marker, boolean isAdmin) {
         
@@ -324,16 +289,16 @@ public final class GriefPreventionDynmap extends JavaPlugin {
         int fillColor = 0xFF0000;
         
         try {
-            lineColor = Integer.parseInt(this.getSetting(isAdmin ? Setting.AdminMarkerLineColor : Setting.MarkerLineColor, "FF0000"), 16);
-            fillColor = Integer.parseInt(this.getSetting(isAdmin ? Setting.AdminMarkerFillColor : Setting.MarkerFillColor, "FF0000"), 16);
+            lineColor = Integer.parseInt(Setting.getSetting(isAdmin ? Setting.AdminMarkerLineColor : Setting.MarkerLineColor, "FF0000"), 16);
+            fillColor = Integer.parseInt(Setting.getSetting(isAdmin ? Setting.AdminMarkerFillColor : Setting.MarkerFillColor, "FF0000"), 16);
         }
         catch (Exception ex) {
-            this.logException("Invalid syle color specified. Defaulting to red.", ex);
+            getLogger().log(Level.WARNING, "Invalid syle color specified. Defaulting to red.", ex);
         }
         
-        int lineWeight = this.getSetting(isAdmin ? Setting.AdminMarkerLineWeight : Setting.MarkerLineWeight, 2);
-        double lineOpacity = this.getSetting(isAdmin ? Setting.AdminMarkerLineOpacity : Setting.MarkerLineOpacity, 0.8);
-        double fillOpacity = this.getSetting(isAdmin ? Setting.AdminMarkerFillOpacity : Setting.MarkerFillOpacity, 0.35);
+        int lineWeight = Setting.getSetting(isAdmin ? Setting.AdminMarkerLineWeight : Setting.MarkerLineWeight, 2);
+        double lineOpacity = Setting.getSetting(isAdmin ? Setting.AdminMarkerLineOpacity : Setting.MarkerLineOpacity, 0.8);
+        double fillOpacity = Setting.getSetting(isAdmin ? Setting.AdminMarkerFillOpacity : Setting.MarkerFillOpacity, 0.35);
         
         // Set the style of the marker
         marker.setLineStyle(lineWeight, lineOpacity, lineColor);
