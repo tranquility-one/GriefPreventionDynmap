@@ -1,10 +1,11 @@
 package com.samoatesgames.griefpreventiondynmap;
 
-import com.samoatesgames.samoatesplugincore.plugin.SamOatesPlugin;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+
 import me.ryanhamshire.GriefPrevention.Claim;
 import me.ryanhamshire.GriefPrevention.DataStore;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
@@ -12,6 +13,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.dynmap.DynmapAPI;
 import org.dynmap.markers.AreaMarker;
@@ -23,7 +25,7 @@ import org.dynmap.markers.MarkerSet;
  *
  * @author Sam Oates <sam@samoatesgames.com>
  */
-public final class GriefPreventionDynmap extends SamOatesPlugin {
+public final class GriefPreventionDynmap extends JavaPlugin {
 
     /**
      * The dynmap api
@@ -59,13 +61,6 @@ public final class GriefPreventionDynmap extends SamOatesPlugin {
      * The reflected field containing the claims
      */
     private Field m_claimsField = null;
-    
-    /**
-     * Class constructor
-     */
-    public GriefPreventionDynmap() {
-        super("GriefPreventionDynmap", "GriefPreventionDynmap", ChatColor.RED);
-    }
 
     /**
      * Called when the plugin is enabled
@@ -129,29 +124,28 @@ public final class GriefPreventionDynmap extends SamOatesPlugin {
         this.logInfo("Succesfully enabled.");
     }
 
-    /**
-     * Register all configuration settings
-     */
-    public void setupConfigurationSettings() {
-        
-        this.registerSetting(Setting.ShowChildClaims, true);    // Should child claims be shown on the dynmap
-        this.registerSetting(Setting.DynmapUpdateRate, 30);     // How many seconds should we wait before refreshing the dynmap layer
-        
-        this.registerSetting(Setting.ClaimsLayerName, "Claims");    // The name of the claims layer shown on dynmap
-        this.registerSetting(Setting.ClaimsLayerPriority, 10);      // The render priority of the claims layer shown on dynmap
-        this.registerSetting(Setting.ClaimsLayerHiddenByDefault, false);    // Should the claims layer be hidden by default on the dynmap
-        
-        this.registerSetting(Setting.MarkerLineColor, "FF0000");    // The color of the border of the marker (in hex)
-        this.registerSetting(Setting.MarkerLineWeight, 2);          // The thickness of the border of the marker
-        this.registerSetting(Setting.MarkerLineOpacity, 0.8);       // The alpha transparacy level of the border for the marker
-        this.registerSetting(Setting.MarkerFillColor, "FF0000");    // THe fill color of the marker (in hex)
-        this.registerSetting(Setting.MarkerFillOpacity, 0.35);      // The alpha transparacy level of the fill for the marker
-        
-        this.registerSetting(Setting.AdminMarkerLineColor, "FF0000");    // The color of the border of the admin marker (in hex)
-        this.registerSetting(Setting.AdminMarkerLineWeight, 2);          // The thickness of the border of the admin marker
-        this.registerSetting(Setting.AdminMarkerLineOpacity, 0.8);       // The alpha transparacy level of the border for the admin marker
-        this.registerSetting(Setting.AdminMarkerFillColor, "FF0000");    // THe fill color of the admin marker (in hex)
-        this.registerSetting(Setting.AdminMarkerFillOpacity, 0.35);      // The alpha transparacy level of the fill for the admin marker
+    private void logInfo(String s) {
+        getLogger().info(s);
+    }
+
+    private int getSetting(String setting, int def) {
+        return setting != null && !setting.isEmpty() ? Integer.parseInt(setting) : def;
+    }
+
+    private String getSetting(String setting, String def) {
+        return setting != null && !setting.isEmpty() ? setting : def;
+    }
+
+    private boolean getSetting(String setting, boolean def) {
+        return setting != null && !setting.isEmpty() ? Boolean.parseBoolean(setting) : def;
+    }
+
+    private double getSetting(String setting, double def) {
+        return setting != null && !setting.isEmpty() ? Double.parseDouble(setting) : def;
+    }
+
+    private void logError(String s) {
+        getLogger().warning(s);
     }
     
     /**
@@ -217,7 +211,11 @@ public final class GriefPreventionDynmap extends SamOatesPlugin {
         
         return true;
     }
-    
+
+    private void logException(String s, Exception ex) {
+        getLogger().log(Level.WARNING, s, ex);
+    }
+
     /**
      * Update all claims
      */
