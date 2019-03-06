@@ -4,3 +4,4 @@ version: 1.0
 authors: [SamOatesPlugins]
 depend: [ dynmap, GriefPrevention ]
 description: Render GriefPrevention claims on a dynamp.
+api-version: 1.13

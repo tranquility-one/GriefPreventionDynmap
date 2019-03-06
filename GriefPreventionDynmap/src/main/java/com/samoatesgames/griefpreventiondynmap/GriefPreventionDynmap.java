@@ -1,13 +1,11 @@
 package com.samoatesgames.griefpreventiondynmap;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
 import me.ryanhamshire.GriefPrevention.Claim;
-import me.ryanhamshire.GriefPrevention.DataStore;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import org.bukkit.Location;
 import org.bukkit.plugin.Plugin;
@@ -50,11 +48,6 @@ public final class GriefPreventionDynmap extends JavaPlugin {
      * The ID of the scheduler update task
      */
     private int m_updateTaskID = -1;
-    
-    /**
-     * The reflected field containing the claims
-     */
-    private Field m_claimsField = null;
 
     /**
      * Called when the plugin is enabled
@@ -66,7 +59,7 @@ public final class GriefPreventionDynmap extends JavaPlugin {
         PluginManager pluginManager = this.getServer().getPluginManager();
         Plugin dynmapPlugin = pluginManager.getPlugin("dynmap");
 
-        // Dynmap isn't installed, disble this plugin
+        // Dynmap isn't installed, disable this plugin
         if (dynmapPlugin == null) {
             getLogger().warning("The dynmap plugin was not found on this server...");
             pluginManager.disablePlugin(this);
@@ -78,7 +71,7 @@ public final class GriefPreventionDynmap extends JavaPlugin {
 
         Plugin griefPreventionPlugin = pluginManager.getPlugin("GriefPrevention");
 
-        // GriefPrevention isn't installed, disble this plugin
+        // GriefPrevention isn't installed, disable this plugin
         if (griefPreventionPlugin == null) {
             getLogger().warning("The grief prevention plugin was not found on this server...");
             pluginManager.disablePlugin(this);
@@ -99,8 +92,6 @@ public final class GriefPreventionDynmap extends JavaPlugin {
             pluginManager.disablePlugin(this);
             return;
         }
-
-        getClaimsField();
         
         BukkitScheduler scheduler = getServer().getScheduler();
         m_updateTaskID = scheduler.scheduleSyncRepeatingTask(
@@ -123,7 +114,6 @@ public final class GriefPreventionDynmap extends JavaPlugin {
      */
     @Override
     public void onDisable() {
-        
         if (m_updateTaskID != -1) {
             BukkitScheduler scheduler = getServer().getScheduler();
             scheduler.cancelTask(m_updateTaskID);
@@ -139,10 +129,9 @@ public final class GriefPreventionDynmap extends JavaPlugin {
     }
 
     /**
-     * Setup the marker set
+     * Setup the marker set in Dynmap
      */
     private boolean setupMarkerSet() {
-
         m_griefPreventionMarkerSet = m_dynmapMarkerAPI.getMarkerSet("griefprevention.markerset");
 
         final String layerName = Setting.getSetting(Setting.ClaimsLayerName, "Claims");
@@ -163,48 +152,13 @@ public final class GriefPreventionDynmap extends JavaPlugin {
         return true;
     }
 
-    private boolean getClaimsField() {
-        
-        try {
-            m_claimsField = DataStore.class.getDeclaredField("claims");
-            m_claimsField.setAccessible(true);
-        } catch (NoSuchFieldException ex) {
-            getLogger().log(Level.WARNING, "Error reflecting claims member from gried prevention, the field 'claims' does not exist!", ex);
-            return false;
-        } catch (SecurityException ex) {
-            getLogger().log(Level.WARNING, "Error reflecting claims member from gried prevention, you don't have permission to do this.", ex);
-            return false;
-        } catch (IllegalArgumentException ex) {
-            getLogger().log(Level.WARNING, "Error reflecting claims member from gried prevention, the specified arguments are invalid.", ex);
-            return false;
-        } 
-        
-        return true;
-    }
-
     /**
      * Update all claims
      */
     private void updateClaims() {
-
         Map<String, AreaMarker> newClaims = new HashMap<String, AreaMarker>();
 
-        ArrayList<Claim> claims = null;
-        try {
-            Object rawClaims = m_claimsField.get(m_griefPreventionPlugin.dataStore);
-            if (rawClaims instanceof ArrayList) {
-                claims = (ArrayList<Claim>) rawClaims;
-            }
-        } catch (SecurityException ex) {
-            getLogger().log(Level.WARNING, "Error reflecting claims member from gried prevention, you don't have permission to do this.", ex);
-            return;
-        } catch (IllegalArgumentException ex) {
-            getLogger().log(Level.WARNING, "Error reflecting claims member from gried prevention, the specified arguments are invalid.", ex);
-            return;
-        } catch (IllegalAccessException ex) {
-            getLogger().log(Level.WARNING, "Error reflecting claims member from gried prevention, you don't have permission to access the feild 'claims'.", ex);
-            return;
-        }
+        Collection<Claim> claims = m_griefPreventionPlugin.dataStore.getClaims();
 
         // We have found claims! Create markers for them all
         if (claims != null) {
@@ -283,7 +237,7 @@ public final class GriefPreventionDynmap extends JavaPlugin {
      * Setup the markers styling
      */
     private void setMarkerStyle(AreaMarker marker, boolean isAdmin) {
-        
+
         // Get the style settings
         int lineColor = 0xFF0000;
         int fillColor = 0xFF0000;
