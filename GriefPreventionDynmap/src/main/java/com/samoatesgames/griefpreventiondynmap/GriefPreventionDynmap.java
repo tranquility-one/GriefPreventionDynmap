@@ -50,11 +50,18 @@ public final class GriefPreventionDynmap extends JavaPlugin {
     private int m_updateTaskID = -1;
 
     /**
+     * The configuration of the plugin
+     */
+    private Config m_config;
+
+    /**
      * Called when the plugin is enabled
      */
     @Override
     public void onEnable() {
         super.onEnable();
+
+        m_config = Config.loadFromFolder(getDataFolder());
 
         PluginManager pluginManager = this.getServer().getPluginManager();
         Plugin dynmapPlugin = pluginManager.getPlugin("dynmap");
@@ -103,7 +110,7 @@ public final class GriefPreventionDynmap extends JavaPlugin {
                     }
                 },
                 20L,
-                20L * Setting.getSetting(Setting.DynmapUpdateRate, 30)
+                20L * m_config.marker.refreshRateInSeconds
         );
 
         getLogger().info("Succesfully enabled.");
@@ -134,11 +141,10 @@ public final class GriefPreventionDynmap extends JavaPlugin {
     private boolean setupMarkerSet() {
         m_griefPreventionMarkerSet = m_dynmapMarkerAPI.getMarkerSet("griefprevention.markerset");
 
-        final String layerName = Setting.getSetting(Setting.ClaimsLayerName, "Claims");
         if (m_griefPreventionMarkerSet == null) {
-            m_griefPreventionMarkerSet = m_dynmapMarkerAPI.createMarkerSet("griefprevention.markerset", layerName, null, false);
+            m_griefPreventionMarkerSet = m_dynmapMarkerAPI.createMarkerSet("griefprevention.markerset", m_config.layer.name, null, false);
         } else {
-            m_griefPreventionMarkerSet.setMarkerSetLabel(layerName);
+            m_griefPreventionMarkerSet.setMarkerSetLabel(m_config.layer.name);
         }
 
         if (m_griefPreventionMarkerSet == null) {
@@ -146,8 +152,8 @@ public final class GriefPreventionDynmap extends JavaPlugin {
             return false;
         }
 
-        m_griefPreventionMarkerSet.setLayerPriority(Setting.getSetting(Setting.ClaimsLayerPriority, 10));
-        m_griefPreventionMarkerSet.setHideByDefault(Setting.getSetting(Setting.ClaimsLayerHiddenByDefault, false));
+        m_griefPreventionMarkerSet.setLayerPriority(m_config.layer.priority);
+        m_griefPreventionMarkerSet.setHideByDefault(m_config.layer.hiddenByDefault);
 
         return true;
     }
@@ -164,7 +170,7 @@ public final class GriefPreventionDynmap extends JavaPlugin {
         if (claims != null) {
             for (Claim claim : claims) {
                 createClaimMarker(claim, newClaims);
-                if (claim.children != null && Setting.getSetting(Setting.ShowChildClaims, true)) {
+                if (claim.children != null && m_config.marker.claim.showChildren) {
                     for (Claim children : claim.children) {
                         createClaimMarker(children, newClaims);
                     }
@@ -243,16 +249,16 @@ public final class GriefPreventionDynmap extends JavaPlugin {
         int fillColor = 0xFF0000;
         
         try {
-            lineColor = Integer.parseInt(Setting.getSetting(isAdmin ? Setting.AdminMarkerLineColor : Setting.MarkerLineColor, "FF0000"), 16);
-            fillColor = Integer.parseInt(Setting.getSetting(isAdmin ? Setting.AdminMarkerFillColor : Setting.MarkerFillColor, "FF0000"), 16);
+            lineColor = Integer.parseInt(isAdmin ? m_config.marker.style.border.color : m_config.marker.admin.style.border.color, 16);
+            fillColor = Integer.parseInt(isAdmin ? m_config.marker.style.fill.color : m_config.marker.admin.style.fill.color, 16);
         }
         catch (Exception ex) {
             getLogger().log(Level.WARNING, "Invalid syle color specified. Defaulting to red.", ex);
         }
         
-        int lineWeight = Setting.getSetting(isAdmin ? Setting.AdminMarkerLineWeight : Setting.MarkerLineWeight, 2);
-        double lineOpacity = Setting.getSetting(isAdmin ? Setting.AdminMarkerLineOpacity : Setting.MarkerLineOpacity, 0.8);
-        double fillOpacity = Setting.getSetting(isAdmin ? Setting.AdminMarkerFillOpacity : Setting.MarkerFillOpacity, 0.35);
+        int lineWeight = isAdmin ? m_config.marker.style.border.weight : m_config.marker.admin.style.border.weight;
+        double lineOpacity = isAdmin ? m_config.marker.style.border.opacity : m_config.marker.admin.style.border.opacity;
+        double fillOpacity = isAdmin ? m_config.marker.style.fill.opacity : m_config.marker.admin.style.fill.opacity;
         
         // Set the style of the marker
         marker.setLineStyle(lineWeight, lineOpacity, lineColor);

@@ -37,6 +37,16 @@
             <artifactId>GriefPrevention</artifactId>
             <version>16.11.5</version>
         </dependency>
+        <dependency>
+            <groupId>org.cubeengine</groupId>
+            <artifactId>reflect-core</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.cubeengine</groupId>
+            <artifactId>reflect-yaml</artifactId>
+            <version>3.0.0</version>
+        </dependency>
     </dependencies>
     
     <build>
@@ -48,7 +58,7 @@
                 <configuration>
                     <artifactSet>
                         <includes>
-                            <include>com.samoatesgames:*</include>
+                            <Include>org.cubeengine:*</Include>
                         </includes>
                     </artifactSet>
                 </configuration>
