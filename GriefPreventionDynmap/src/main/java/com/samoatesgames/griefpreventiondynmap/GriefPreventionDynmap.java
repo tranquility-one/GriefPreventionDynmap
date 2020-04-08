@@ -5,6 +5,7 @@ import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import me.ryanhamshire.GriefPrevention.Messages;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
@@ -16,10 +17,7 @@ import org.dynmap.markers.AreaMarker;
 import org.dynmap.markers.MarkerAPI;
 import org.dynmap.markers.MarkerSet;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 
 /**
@@ -343,11 +341,27 @@ public final class GriefPreventionDynmap extends JavaPlugin {
         String permissionText = "";
         if (!list.isEmpty()) {
             permissionText += "<br/>" + listName + ": ";
-            for (String item : list) {
-                permissionText += item + ", ";
+            for (String user : list) {
+                if (!user.equals("public")) {
+                    user = this.getPlayerNameByUuid(UUID.fromString(user));
+                }
+                permissionText += user + ", ";
             }
             permissionText = permissionText.substring(0, permissionText.lastIndexOf(", "));
         }
         return permissionText;
     }
+
+    public String getPlayerNameByUuid(UUID userId) {
+        if (this.getServer().getPlayer(userId) != null) {
+            return this.getServer().getPlayer(userId).getDisplayName();
+        }
+        for (OfflinePlayer p : getServer().getOfflinePlayers()) {
+            if (p.getUniqueId().equals(userId)) {
+                return p.getName();
+            }
+        }
+        return userId.toString();
+    }
+
 }
