@@ -9,7 +9,7 @@ import java.io.File;
 
 @SuppressWarnings("CanBeFinal")
 public class Config extends ReflectedYaml {
-
+    @Comment("Layer config requires server reboot to be reloaded")
     LayerSection layer = new LayerSection();
     MarkerSection marker = new MarkerSection();
 

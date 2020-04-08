@@ -1,15 +1,12 @@
 package com.samoatesgames.griefpreventiondynmap;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
-
 import me.ryanhamshire.GriefPrevention.Claim;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import me.ryanhamshire.GriefPrevention.Messages;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -18,6 +15,12 @@ import org.dynmap.DynmapAPI;
 import org.dynmap.markers.AreaMarker;
 import org.dynmap.markers.MarkerAPI;
 import org.dynmap.markers.MarkerSet;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * The main plugin class
@@ -135,6 +138,16 @@ public final class GriefPreventionDynmap extends JavaPlugin {
         m_claims.clear();
 
         m_griefPreventionMarkerSet.deleteMarkerSet();
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (command.getName().equalsIgnoreCase("gpdreload")) {
+            m_config = Config.loadFromFolder(getDataFolder());
+            sender.sendMessage(ChatColor.RED + "GriefPreventionDynmap has been reloaded");
+            return true;
+        }
+        return false;
     }
 
     /**

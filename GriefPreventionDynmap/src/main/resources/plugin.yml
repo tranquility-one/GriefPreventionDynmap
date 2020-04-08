@@ -5,3 +5,11 @@ authors: [SamOatesPlugins]
 depend: [ dynmap, GriefPrevention ]
 description: Render GriefPrevention claims on a dynamp.
 api-version: 1.13
+permissions:
+  gpd.admin.reload:
+    description: Allow access to /gpd reload
+commands:
+  gpdreload:
+    description: Reloads Grief Prevention's configuration settings.  Does NOT totally reload the entire plugin.
+    usage: /gpdreload
+    permission: gpd.admin.reload
