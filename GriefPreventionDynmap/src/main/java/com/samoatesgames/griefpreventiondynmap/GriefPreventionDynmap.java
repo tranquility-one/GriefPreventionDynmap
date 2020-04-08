@@ -1,5 +1,6 @@
 package com.samoatesgames.griefpreventiondynmap;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -281,13 +282,13 @@ public final class GriefPreventionDynmap extends JavaPlugin {
 
         String areaText = "";
         if (m_config.marker.claim.showArea) {
-            areaText += claim.getArea();
+            areaText += "Claim area: " + claim.getArea();
             if (m_config.marker.claim.showDimensions) {
                 areaText += "<br/>";
             }
         }
         if (m_config.marker.claim.showDimensions) {
-            areaText += claim.getHeight() + " x " + claim.getWidth();
+            areaText += "Claim dimensions: " + claim.getWidth() + " x " + claim.getHeight();
         }
 
         return "<div class=\"regioninfo\">" +
@@ -296,8 +297,44 @@ public final class GriefPreventionDynmap extends JavaPlugin {
                 "<span style=\"font-weight:bold;\">" + owner + "'s claim</span><br/>" +
                 (isAdmin ? "" : "<img src='https://minotar.net/helm/" + owner + "/20' /><br/>") +
                 areaText +
+                getClaimPermissionsText(claim) +
                 "</div>" +
                 "</center>" +
                 "</div>";
+    }
+
+    private String getClaimPermissionsText(Claim claim) {
+        String claimPermissions = "";
+        ArrayList<String> builders = new ArrayList<String>();
+        ArrayList<String> containers = new ArrayList<String>();
+        ArrayList<String> accessors = new ArrayList<String>();
+        ArrayList<String> managers = new ArrayList<String>();
+        claim.getPermissions(builders, containers, accessors, managers);
+
+        if (m_config.marker.claim.showBuilders) {
+            claimPermissions += getPermissionsFromList(builders, "Builders");
+        }
+        if (m_config.marker.claim.showContainers) {
+            claimPermissions += getPermissionsFromList(containers, "Containers");
+        }
+        if (m_config.marker.claim.showAccessors) {
+            claimPermissions += getPermissionsFromList(accessors, "Accessors");
+        }
+        if (m_config.marker.claim.showManagers) {
+            claimPermissions += getPermissionsFromList(managers, "Managers");
+        }
+        return claimPermissions;
+    }
+
+    private String getPermissionsFromList(ArrayList<String> list, String listName) {
+        String permissionText = "";
+        if (!list.isEmpty()) {
+            permissionText += "<br/>" + listName + ": ";
+            for (String item : list) {
+                permissionText += item + ", ";
+            }
+            permissionText = permissionText.substring(0, permissionText.lastIndexOf(", "));
+        }
+        return permissionText;
     }
 }

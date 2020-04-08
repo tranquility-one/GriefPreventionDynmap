@@ -34,10 +34,18 @@ public class Config extends ReflectedYaml {
     public static class MarkerClaimSection implements Section {
         @Comment("Should child claims be shown on the dynmap")
         boolean showChildren = false;
-        @Comment("Show claim area?")
+        @Comment("Show claim blocks count?")
         boolean showArea = true;
         @Comment("Show claim dimensions?")
         boolean showDimensions = false;
+        @Comment("Show users with full trust?")
+        boolean showBuilders = true;
+        @Comment("Show users with container trust?")
+        boolean showContainers = false;
+        @Comment("Show users with access trust?")
+        boolean showAccessors = false;
+        @Comment("Show users with permission trust?")
+        boolean showManagers = false;
     }
 
     public static class MarkerStyleSection implements Section {
