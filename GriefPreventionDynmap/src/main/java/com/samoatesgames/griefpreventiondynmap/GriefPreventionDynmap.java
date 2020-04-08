@@ -191,8 +191,9 @@ public final class GriefPreventionDynmap extends JavaPlugin {
 
     /**
      * Create a new claim marker
-     * @param claim    The claim to create a marker for
-     * @param claimsMap    The map of new claims
+     *
+     * @param claim     The claim to create a marker for
+     * @param claimsMap The map of new claims
      */
     private void createClaimMarker(Claim claim, Map<String, AreaMarker> claimsMap) {
 
@@ -252,8 +253,7 @@ public final class GriefPreventionDynmap extends JavaPlugin {
         try {
             lineColor = Integer.parseInt(isAdmin ? m_config.marker.style.border.color : m_config.marker.admin.style.border.color, 16);
             fillColor = Integer.parseInt(isAdmin ? m_config.marker.style.fill.color : m_config.marker.admin.style.fill.color, 16);
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             getLogger().log(Level.WARNING, "Invalid syle color specified. Defaulting to red.", ex);
         }
 
@@ -268,6 +268,7 @@ public final class GriefPreventionDynmap extends JavaPlugin {
 
     /**
      * Setup the markers format window
+     *
      * @param claim The claim to setup the window for
      * @return Html representation of the information window
      */
@@ -277,12 +278,24 @@ public final class GriefPreventionDynmap extends JavaPlugin {
         if (owner.equals(GriefPrevention.instance.dataStore.getMessage(Messages.OwnerNameForAdminClaims))) {
             owner = m_config.marker.admin.nameOverride;
         }
+
+        String areaText = "";
+        if (m_config.marker.claim.showArea) {
+            areaText += claim.getArea();
+            if (m_config.marker.claim.showDimensions) {
+                areaText += "<br/>";
+            }
+        }
+        if (m_config.marker.claim.showDimensions) {
+            areaText += claim.getHeight() + " x " + claim.getWidth();
+        }
+
         return "<div class=\"regioninfo\">" +
                 "<center>" +
-                "<div class=\"infowindow\">"+
+                "<div class=\"infowindow\">" +
                 "<span style=\"font-weight:bold;\">" + owner + "'s claim</span><br/>" +
                 (isAdmin ? "" : "<img src='https://minotar.net/helm/" + owner + "/20' /><br/>") +
-                claim.getWidth() + " x " + claim.getHeight() +
+                areaText +
                 "</div>" +
                 "</center>" +
                 "</div>";

@@ -34,6 +34,10 @@ public class Config extends ReflectedYaml {
     public static class MarkerClaimSection implements Section {
         @Comment("Should child claims be shown on the dynmap")
         boolean showChildren = false;
+        @Comment("Show claim area?")
+        boolean showArea = true;
+        @Comment("Show claim dimensions?")
+        boolean showDimensions = false;
     }
 
     public static class MarkerStyleSection implements Section {

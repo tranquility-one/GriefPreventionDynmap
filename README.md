@@ -1,4 +1,4 @@
 GriefPreventionDynmap
 =====================
 
-Add GreifPrevention claim rendering to dynmap
+Add GriefPrevention claim rendering to dynmap

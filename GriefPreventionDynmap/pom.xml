@@ -9,7 +9,7 @@
     <repositories>
         <repository>
             <id>spigot-snapshots</id>
-            <url>http://repo.md-5.net/content/repositories/snapshots/</url>
+            <url>http://maven.elmakers.com/repository/</url>
         </repository>
         <repository>
             <id>dynmap-repo</id>
@@ -25,7 +25,7 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.7.10-R0.1-SNAPSHOT</version>
+            <version>1.15.2-R0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>us.dynmap</groupId>
@@ -35,7 +35,7 @@
         <dependency>
             <groupId>com.github.TechFortress</groupId>
             <artifactId>GriefPrevention</artifactId>
-            <version>16.11.5</version>
+            <version>16.13.0</version>
         </dependency>
         <dependency>
             <groupId>org.cubeengine</groupId>
