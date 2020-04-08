@@ -13,5 +13,6 @@ hs_err_pid*
 GriefPreventionDynmap/target/*
 GriefPreventionDynmap/dependency-reduced-pom.xml
 
-/.idea/
+/.idea/*
+!/.idea/runConfigurations/
 *.iml
