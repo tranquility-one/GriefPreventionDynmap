@@ -42,8 +42,9 @@ public class Config extends ReflectedYaml {
     }
 
     public static class MarkerAdminSection implements Section {
-        MarkerStyleSection style = new MarkerStyleSection();
+        @Comment("The name to use for administrator claims (default 'an administrator'")
         String nameOverride = "an administrator";
+        MarkerStyleSection style = new MarkerStyleSection();
     }
 
     public static class MarkerStyleBorderSection implements Section {
