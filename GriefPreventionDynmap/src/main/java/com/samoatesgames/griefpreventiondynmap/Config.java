@@ -14,7 +14,7 @@ public class Config extends ReflectedYaml {
     MarkerSection marker = new MarkerSection();
 
     public static class LayerSection implements Section {
-        @Comment("The name of the claims layer shwon on dynmap")
+        @Comment("The name of the claims layer shown on dynmap")
         String name = "Claims";
         @Comment("The render priority of the claims layer shown on dynmap")
         int priority = 10;
@@ -43,6 +43,7 @@ public class Config extends ReflectedYaml {
 
     public static class MarkerAdminSection implements Section {
         MarkerStyleSection style = new MarkerStyleSection();
+        String nameOverride = "an administrator";
     }
 
     public static class MarkerStyleBorderSection implements Section {

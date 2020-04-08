@@ -7,6 +7,7 @@ import java.util.logging.Level;
 
 import me.ryanhamshire.GriefPrevention.Claim;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
+import me.ryanhamshire.GriefPrevention.Messages;
 import org.bukkit.Location;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
@@ -93,13 +94,13 @@ public final class GriefPreventionDynmap extends JavaPlugin {
             pluginManager.disablePlugin(this);
             return;
         }
-        
+
         if (!setupMarkerSet()) {
             getLogger().warning("Failed to setup a marker set...");
             pluginManager.disablePlugin(this);
             return;
         }
-        
+
         BukkitScheduler scheduler = getServer().getScheduler();
         m_updateTaskID = scheduler.scheduleSyncRepeatingTask(
                 this,
@@ -126,7 +127,7 @@ public final class GriefPreventionDynmap extends JavaPlugin {
             scheduler.cancelTask(m_updateTaskID);
             m_updateTaskID = -1;
         }
-        
+
         for (AreaMarker marker : m_claims.values()) {
             marker.deleteMarker();
         }
@@ -177,7 +178,7 @@ public final class GriefPreventionDynmap extends JavaPlugin {
                 }
             }
         }
-        
+
         // Remove any markers for claims which no longer exist
         for (AreaMarker oldm : m_claims.values()) {
             oldm.deleteMarker();
@@ -203,7 +204,7 @@ public final class GriefPreventionDynmap extends JavaPlugin {
 
         String worldname = lowerBounds.getWorld().getName();
         String owner = claim.getOwnerName();
-        
+
         // Make outline
         double[] x = new double[4];
         double[] z = new double[4];
@@ -215,7 +216,7 @@ public final class GriefPreventionDynmap extends JavaPlugin {
         z[2] = higherBounds.getZ() + 1.0;
         x[3] = higherBounds.getX() + 1.0;
         z[3] = lowerBounds.getZ();
-        
+
         final String markerid = "Claim_" + claim.getID();
         AreaMarker marker = m_claims.remove(markerid);
         if (marker == null) {
@@ -247,7 +248,7 @@ public final class GriefPreventionDynmap extends JavaPlugin {
         // Get the style settings
         int lineColor = 0xFF0000;
         int fillColor = 0xFF0000;
-        
+
         try {
             lineColor = Integer.parseInt(isAdmin ? m_config.marker.style.border.color : m_config.marker.admin.style.border.color, 16);
             fillColor = Integer.parseInt(isAdmin ? m_config.marker.style.fill.color : m_config.marker.admin.style.fill.color, 16);
@@ -255,11 +256,11 @@ public final class GriefPreventionDynmap extends JavaPlugin {
         catch (Exception ex) {
             getLogger().log(Level.WARNING, "Invalid syle color specified. Defaulting to red.", ex);
         }
-        
+
         int lineWeight = isAdmin ? m_config.marker.style.border.weight : m_config.marker.admin.style.border.weight;
         double lineOpacity = isAdmin ? m_config.marker.style.border.opacity : m_config.marker.admin.style.border.opacity;
         double fillOpacity = isAdmin ? m_config.marker.style.fill.opacity : m_config.marker.admin.style.fill.opacity;
-        
+
         // Set the style of the marker
         marker.setLineStyle(lineWeight, lineOpacity, lineColor);
         marker.setFillStyle(fillOpacity, fillColor);
@@ -272,15 +273,18 @@ public final class GriefPreventionDynmap extends JavaPlugin {
      */
     private String formatInfoWindow(Claim claim) {
         final boolean isAdmin = claim.isAdminClaim();
-        final String owner = claim.getOwnerName();
-        return "<div class=\"regioninfo\">" + 
-                    "<center>" + 
-                        "<div class=\"infowindow\">"+ 
-                            "<span style=\"font-weight:bold;\">" + owner + "'s claim</span><br/>" + 
-                            (isAdmin ? "" : "<img src='https://minotar.net/helm/" + owner + "/20' /><br/>") +
-                            claim.getWidth() + " x " + claim.getHeight() +
-                        "</div>" + 
-                    "</center>" +
+        String owner = claim.getOwnerName();
+        if (owner.equals(GriefPrevention.instance.dataStore.getMessage(Messages.OwnerNameForAdminClaims))) {
+            owner = m_config.marker.admin.nameOverride;
+        }
+        return "<div class=\"regioninfo\">" +
+                "<center>" +
+                "<div class=\"infowindow\">"+
+                "<span style=\"font-weight:bold;\">" + owner + "'s claim</span><br/>" +
+                (isAdmin ? "" : "<img src='https://minotar.net/helm/" + owner + "/20' /><br/>") +
+                claim.getWidth() + " x " + claim.getHeight() +
+                "</div>" +
+                "</center>" +
                 "</div>";
     }
 }
