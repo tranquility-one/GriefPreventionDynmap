@@ -292,14 +292,11 @@ public final class GriefPreventionDynmap extends JavaPlugin {
         }
 
         String areaText = "";
-        if (m_config.marker.claim.showArea) {
-            areaText += "Claim area: " + claim.getArea();
-            if (m_config.marker.claim.showDimensions) {
-                areaText += "<br/>";
-            }
-        }
         if (m_config.marker.claim.showDimensions) {
-            areaText += "Claim dimensions: " + claim.getWidth() + " x " + claim.getHeight();
+            areaText += this.getHeaderHtml("Dimensions") + claim.getWidth() + " x " + claim.getHeight() + "<br/>";
+        }
+        if (m_config.marker.claim.showArea) {
+            areaText += this.getHeaderHtml("Claim blocks") + claim.getArea() + "<br/>";
         }
 
         return "<div class=\"regioninfo\">" +
@@ -316,23 +313,25 @@ public final class GriefPreventionDynmap extends JavaPlugin {
 
     private String getClaimPermissionsText(Claim claim) {
         String claimPermissions = "";
-        ArrayList<String> builders = new ArrayList<String>();
-        ArrayList<String> containers = new ArrayList<String>();
-        ArrayList<String> accessors = new ArrayList<String>();
-        ArrayList<String> managers = new ArrayList<String>();
-        claim.getPermissions(builders, containers, accessors, managers);
+        if ((claim.isAdminClaim() && m_config.marker.admin.showPermissions) || !claim.isAdminClaim()) {
+            ArrayList<String> builders = new ArrayList<String>();
+            ArrayList<String> containers = new ArrayList<String>();
+            ArrayList<String> accessors = new ArrayList<String>();
+            ArrayList<String> managers = new ArrayList<String>();
+            claim.getPermissions(builders, containers, accessors, managers);
 
-        if (m_config.marker.claim.showBuilders) {
-            claimPermissions += getPermissionsFromList(builders, "Builders");
-        }
-        if (m_config.marker.claim.showContainers) {
-            claimPermissions += getPermissionsFromList(containers, "Containers");
-        }
-        if (m_config.marker.claim.showAccessors) {
-            claimPermissions += getPermissionsFromList(accessors, "Accessors");
-        }
-        if (m_config.marker.claim.showManagers) {
-            claimPermissions += getPermissionsFromList(managers, "Managers");
+            if (m_config.marker.claim.showBuilders) {
+                claimPermissions += getPermissionsFromList(builders, "Full Trust");
+            }
+            if (m_config.marker.claim.showContainers) {
+                claimPermissions += getPermissionsFromList(containers, "Container Trust");
+            }
+            if (m_config.marker.claim.showAccessors) {
+                claimPermissions += getPermissionsFromList(accessors, "Access Trust");
+            }
+            if (m_config.marker.claim.showManagers) {
+                claimPermissions += getPermissionsFromList(managers, "Permissions Trust");
+            }
         }
         return claimPermissions;
     }
@@ -340,7 +339,7 @@ public final class GriefPreventionDynmap extends JavaPlugin {
     private String getPermissionsFromList(ArrayList<String> list, String listName) {
         String permissionText = "";
         if (!list.isEmpty()) {
-            permissionText += "<br/>" + listName + ": ";
+            permissionText += "<br/>" + this.getHeaderHtml(listName);
             for (String user : list) {
                 if (!user.equals("public")) {
                     user = this.getPlayerNameByUuid(UUID.fromString(user));
@@ -352,7 +351,7 @@ public final class GriefPreventionDynmap extends JavaPlugin {
         return permissionText;
     }
 
-    public String getPlayerNameByUuid(UUID userId) {
+    private String getPlayerNameByUuid(UUID userId) {
         if (this.getServer().getPlayer(userId) != null) {
             return this.getServer().getPlayer(userId).getDisplayName();
         }
@@ -362,6 +361,10 @@ public final class GriefPreventionDynmap extends JavaPlugin {
             }
         }
         return userId.toString();
+    }
+
+    private String getHeaderHtml(String header) {
+        return "<strong>" + header + ": </strong>";
     }
 
 }

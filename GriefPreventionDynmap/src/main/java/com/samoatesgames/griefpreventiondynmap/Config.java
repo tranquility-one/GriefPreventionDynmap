@@ -56,6 +56,8 @@ public class Config extends ReflectedYaml {
     public static class MarkerAdminSection implements Section {
         @Comment("The name to use for administrator claims")
         String nameOverride = "an administrator";
+        @Comment("Show user permissions for admin claims?")
+        boolean showPermissions = false;
         MarkerStyleSection style = new MarkerStyleSection();
     }
 
