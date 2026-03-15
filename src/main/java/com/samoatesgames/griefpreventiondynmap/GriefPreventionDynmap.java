@@ -45,7 +45,7 @@ public final class GriefPreventionDynmap extends JavaPlugin {
     /**
      * All claims
      */
-    private Map<String, AreaMarker> m_claims = new HashMap<String, AreaMarker>();
+    private Map<String, AreaMarker> m_claims = new HashMap<>();
 
     /**
      * The ID of the scheduler update task
@@ -106,17 +106,12 @@ public final class GriefPreventionDynmap extends JavaPlugin {
         BukkitScheduler scheduler = getServer().getScheduler();
         m_updateTaskID = scheduler.scheduleSyncRepeatingTask(
                 this,
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        updateClaims();
-                    }
-                },
+                this::updateClaims,
                 20L,
                 20L * m_config.marker.refreshRateInSeconds
         );
 
-        getLogger().info("Succesfully enabled.");
+        getLogger().info("Successfully enabled.");
     }
 
     /**
@@ -141,6 +136,10 @@ public final class GriefPreventionDynmap extends JavaPlugin {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (command.getName().equalsIgnoreCase("gpdreload")) {
+            if (!sender.hasPermission("gpd.admin.reload")) {
+                sender.sendMessage(ChatColor.RED + "You don't have permission to use this command.");
+                return true;
+            }
             m_config = Config.loadFromFolder(getDataFolder());
             sender.sendMessage(ChatColor.RED + "GriefPreventionDynmap has been reloaded");
             return true;
@@ -175,7 +174,7 @@ public final class GriefPreventionDynmap extends JavaPlugin {
      * Update all claims
      */
     private void updateClaims() {
-        Map<String, AreaMarker> newClaims = new HashMap<String, AreaMarker>();
+        Map<String, AreaMarker> newClaims = new HashMap<>();
 
         Collection<Claim> claims = m_griefPreventionPlugin.dataStore.getClaims();
 
@@ -197,7 +196,6 @@ public final class GriefPreventionDynmap extends JavaPlugin {
         }
 
         // And replace with new map
-        m_claims.clear();
         m_claims = newClaims;
     }
 
@@ -263,15 +261,15 @@ public final class GriefPreventionDynmap extends JavaPlugin {
         int fillColor = 0xFF0000;
 
         try {
-            lineColor = Integer.parseInt(isAdmin ? m_config.marker.style.border.color : m_config.marker.admin.style.border.color, 16);
-            fillColor = Integer.parseInt(isAdmin ? m_config.marker.style.fill.color : m_config.marker.admin.style.fill.color, 16);
+            lineColor = Integer.parseInt(isAdmin ? m_config.marker.admin.style.border.color : m_config.marker.style.border.color, 16);
+            fillColor = Integer.parseInt(isAdmin ? m_config.marker.admin.style.fill.color : m_config.marker.style.fill.color, 16);
         } catch (Exception ex) {
             getLogger().log(Level.WARNING, "Invalid syle color specified. Defaulting to red.", ex);
         }
 
-        int lineWeight = isAdmin ? m_config.marker.style.border.weight : m_config.marker.admin.style.border.weight;
-        double lineOpacity = isAdmin ? m_config.marker.style.border.opacity : m_config.marker.admin.style.border.opacity;
-        double fillOpacity = isAdmin ? m_config.marker.style.fill.opacity : m_config.marker.admin.style.fill.opacity;
+        int lineWeight = isAdmin ? m_config.marker.admin.style.border.weight : m_config.marker.style.border.weight;
+        double lineOpacity = isAdmin ? m_config.marker.admin.style.border.opacity : m_config.marker.style.border.opacity;
+        double fillOpacity = isAdmin ? m_config.marker.admin.style.fill.opacity : m_config.marker.style.fill.opacity;
 
         // Set the style of the marker
         marker.setLineStyle(lineWeight, lineOpacity, lineColor);
@@ -314,10 +312,10 @@ public final class GriefPreventionDynmap extends JavaPlugin {
     private String getClaimPermissionsText(Claim claim) {
         String claimPermissions = "";
         if ((claim.isAdminClaim() && m_config.marker.admin.showPermissions) || !claim.isAdminClaim()) {
-            ArrayList<String> builders = new ArrayList<String>();
-            ArrayList<String> containers = new ArrayList<String>();
-            ArrayList<String> accessors = new ArrayList<String>();
-            ArrayList<String> managers = new ArrayList<String>();
+            ArrayList<String> builders = new ArrayList<>();
+            ArrayList<String> containers = new ArrayList<>();
+            ArrayList<String> accessors = new ArrayList<>();
+            ArrayList<String> managers = new ArrayList<>();
             claim.getPermissions(builders, containers, accessors, managers);
 
             if (m_config.marker.claim.showBuilders) {
@@ -336,31 +334,30 @@ public final class GriefPreventionDynmap extends JavaPlugin {
         return claimPermissions;
     }
 
-    private String getPermissionsFromList(ArrayList<String> list, String listName) {
-        String permissionText = "";
-        if (!list.isEmpty()) {
-            permissionText += "<br/>" + this.getHeaderHtml(listName);
-            for (String user : list) {
-                if (!user.equals("public")) {
-                    user = this.getPlayerNameByUuid(UUID.fromString(user));
-                }
-                permissionText += user + ", ";
-            }
-            permissionText = permissionText.substring(0, permissionText.lastIndexOf(", "));
+    private String getPermissionsFromList(List<String> list, String listName) {
+        if (list.isEmpty()) {
+            return "";
         }
-        return permissionText;
+        StringBuilder permissionText = new StringBuilder();
+        permissionText.append("<br/>").append(this.getHeaderHtml(listName));
+        for (String user : list) {
+            if (!user.equals("public")) {
+                try {
+                    user = this.getPlayerNameByUuid(UUID.fromString(user));
+                } catch (IllegalArgumentException ignored) {
+                    // Not a valid UUID (e.g. group name like [all]), use as-is
+                }
+            }
+            permissionText.append(user).append(", ");
+        }
+        permissionText.setLength(permissionText.length() - 2);
+        return permissionText.toString();
     }
 
     private String getPlayerNameByUuid(UUID userId) {
-        if (this.getServer().getPlayer(userId) != null) {
-            return this.getServer().getPlayer(userId).getDisplayName();
-        }
-        for (OfflinePlayer p : getServer().getOfflinePlayers()) {
-            if (p.getUniqueId().equals(userId)) {
-                return p.getName();
-            }
-        }
-        return userId.toString();
+        OfflinePlayer player = getServer().getOfflinePlayer(userId);
+        String name = player.getName();
+        return name != null ? name : userId.toString();
     }
 
     private String getHeaderHtml(String header) {
