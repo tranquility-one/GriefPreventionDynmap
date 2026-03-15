@@ -5,11 +5,11 @@
     <artifactId>GriefPreventionDynmap</artifactId>
     <version>1.4-SNAPSHOT</version>
     <packaging>jar</packaging>
-    
+
     <repositories>
         <repository>
             <id>spigot-snapshots</id>
-            <url>https://maven.elmakers.com/repository/</url>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
         <repository>
             <id>dynmap-repo</id>
@@ -20,22 +20,22 @@
             <url>https://jitpack.io</url>
         </repository>
     </repositories>
-    
+
     <dependencies>
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.15.2-R0.1-SNAPSHOT</version>
+            <version>1.21-R0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>us.dynmap</groupId>
             <artifactId>dynmap-api</artifactId>
-            <version>2.5</version>
+            <version>3.4-beta-3</version>
         </dependency>
         <dependency>
             <groupId>com.github.TechFortress</groupId>
             <artifactId>GriefPrevention</artifactId>
-            <version>16.13.0</version>
+            <version>16.18.1</version>
         </dependency>
         <dependency>
             <groupId>org.cubeengine</groupId>
@@ -48,19 +48,27 @@
             <version>3.0.0</version>
         </dependency>
     </dependencies>
-    
+
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>2.3</version>
+                <version>3.6.0</version>
                 <configuration>
                     <artifactSet>
                         <includes>
                             <Include>org.cubeengine:*</Include>
                         </includes>
                     </artifactSet>
+                    <filters>
+                        <filter>
+                            <artifact>org.cubeengine:*</artifact>
+                            <excludes>
+                                <exclude>META-INF/MANIFEST.MF</exclude>
+                            </excludes>
+                        </filter>
+                    </filters>
                 </configuration>
                 <executions>
                     <execution>
@@ -74,13 +82,13 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
                 <configuration>
-                    <source>6</source>
-                    <target>6</target>
+                    <release>21</release>
                 </configuration>
             </plugin>
         </plugins>
-    
+
         <resources>
             <resource>
                 <targetPath>.</targetPath>
@@ -92,7 +100,7 @@
             </resource>
         </resources>
     </build>
-        
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>

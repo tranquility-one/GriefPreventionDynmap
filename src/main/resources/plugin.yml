@@ -1,10 +1,10 @@
 name: GriefPreventionDynmap
 main: com.samoatesgames.griefpreventiondynmap.GriefPreventionDynmap
-version: 1.0
+version: ${project.version}
 authors: [SamOatesPlugins]
 depend: [ dynmap, GriefPrevention ]
-description: Render GriefPrevention claims on a dynamp.
-api-version: 1.13
+description: Render GriefPrevention claims on a dynmap.
+api-version: 1.21
 permissions:
   gpd.admin.reload:
     description: Allow access to /gpd reload
